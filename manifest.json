@@ -1,7 +1,7 @@
 {
   "id": "more-periodic-notes",
   "name": "More Periodic Notes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.13.0",
   "description": "Open this week's (ISO), this month's and this year's note with one command. Works on desktop and mobile.",
   "author": "Ruzen",
