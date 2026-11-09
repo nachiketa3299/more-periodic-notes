@@ -1,9 +1,8 @@
+import type { Moment } from 'moment';
 import { App, Notice, TFile, TFolder, moment, normalizePath } from 'obsidian';
 import { t } from './i18n';
 import type { PeriodDefinition } from './periods';
 import type { PeriodSettings } from './settings';
-
-type Moment = ReturnType<typeof moment>;
 
 const MARKDOWN_EXTENSION = '.md';
 

@@ -1,4 +1,11 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import {
+	App,
+	PluginSettingTab,
+	type SettingDefinition,
+	type SettingDefinitionGroup,
+	type SettingDefinitionItem,
+	type TFile,
+} from 'obsidian';
 import { t } from './i18n';
 import type MorePeriodicNotesPlugin from './main';
 import { PERIODS, type PeriodDefinition, type PeriodId } from './periods';
@@ -40,6 +47,23 @@ export function mergeSettings(saved: unknown): MorePeriodicNotesSettings {
 	return { ...DEFAULT_SETTINGS, ...data, periods };
 }
 
+const OPEN_IN_NEW_TAB_KEY = 'openInNewTab';
+
+type PeriodField = keyof PeriodSettings;
+
+function periodKey(period: PeriodDefinition, field: PeriodField): string {
+	return `${period.id}.${field}`;
+}
+
+function parsePeriodKey(key: string): [PeriodId, PeriodField] | null {
+	const [periodId, field] = key.split('.');
+	const period = PERIODS.find((candidate) => candidate.id === periodId);
+	if (!period || !field || !(field in DEFAULT_SETTINGS.periods[period.id])) {
+		return null;
+	}
+	return [period.id, field as PeriodField];
+}
+
 export class MorePeriodicNotesSettingTab extends PluginSettingTab {
 	constructor(
 		app: App,
@@ -48,98 +72,115 @@ export class MorePeriodicNotesSettingTab extends PluginSettingTab {
 		super(app, plugin);
 	}
 
-	display(): void {
-		const { containerEl } = this;
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName(t('settings.openInNewTab.name'))
-			.setDesc(t('settings.openInNewTab.desc'))
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.openInNewTab).onChange(async (value) => {
-					this.plugin.settings.openInNewTab = value;
-					await this.plugin.saveSettings();
-				}),
-			);
-
-		for (const period of PERIODS) {
-			this.displayPeriod(containerEl, period);
-		}
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: t('settings.openInNewTab.name'),
+				desc: t('settings.openInNewTab.desc'),
+				control: { type: 'toggle', key: OPEN_IN_NEW_TAB_KEY },
+			},
+			...PERIODS.map((period) => this.periodGroup(period)),
+		];
 	}
 
-	private displayPeriod(containerEl: HTMLElement, period: PeriodDefinition): void {
-		const settings = this.plugin.settings.periods[period.id];
-		const save = () => this.plugin.saveSettings();
+	getControlValue(key: string): unknown {
+		if (key === OPEN_IN_NEW_TAB_KEY) {
+			return this.plugin.settings.openInNewTab;
+		}
+		const parsed = parsePeriodKey(key);
+		return parsed ? this.plugin.settings.periods[parsed[0]][parsed[1]] : undefined;
+	}
+
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		if (key === OPEN_IN_NEW_TAB_KEY) {
+			this.plugin.settings.openInNewTab = Boolean(value);
+		} else {
+			const parsed = parsePeriodKey(key);
+			if (!parsed) {
+				return;
+			}
+			const settings = this.plugin.settings.periods[parsed[0]];
+			if (parsed[1] === 'enabled') {
+				settings.enabled = Boolean(value);
+			} else {
+				settings[parsed[1]] = typeof value === 'string' ? value.trim() : '';
+			}
+		}
+		await this.plugin.saveSettings();
+		this.refreshDomState();
+	}
+
+	private periodGroup(period: PeriodDefinition): SettingDefinitionGroup {
 		const label = t(`period.label.${period.id}`);
 		const command = t('command.open', { period: t(`period.${period.id}`) });
+		const enabled = () => this.plugin.settings.periods[period.id].enabled;
 
-		new Setting(containerEl).setName(t(`settings.heading.${period.id}`)).setHeading();
+		return {
+			type: 'group',
+			heading: t(`settings.heading.${period.id}`),
+			items: [
+				{
+					name: t('settings.enable.name'),
+					desc: t('settings.enable.desc', { command }),
+					control: { type: 'toggle', key: periodKey(period, 'enabled') },
+				},
+				this.formatDefinition(period, enabled),
+				{
+					name: t('settings.folder.name'),
+					desc: t('settings.folder.desc'),
+					visible: enabled,
+					control: {
+						type: 'folder',
+						key: periodKey(period, 'folder'),
+						placeholder: t('settings.folder.placeholder', { label }),
+						includeRoot: true,
+					},
+				},
+				{
+					name: t('settings.template.name'),
+					desc: t('settings.template.desc'),
+					visible: enabled,
+					control: {
+						type: 'file',
+						key: periodKey(period, 'template'),
+						placeholder: t('settings.template.placeholder', { label }),
+						filter: (file: TFile) => file.extension === 'md',
+					},
+				},
+			],
+		};
+	}
 
-		new Setting(containerEl)
-			.setName(t('settings.enable.name'))
-			.setDesc(t('settings.enable.desc', { command }))
-			.addToggle((toggle) =>
-				toggle.setValue(settings.enabled).onChange(async (value) => {
-					settings.enabled = value;
-					await save();
-					this.display();
-				}),
-			);
-
-		if (!settings.enabled) {
-			return;
-		}
-
-		const formatDesc = document.createDocumentFragment();
-		formatDesc.appendText(t('settings.format.desc'));
-		formatDesc.createEl('a', {
-			text: t('settings.format.reference'),
-			href: 'https://momentjs.com/docs/#/displaying/format/',
-		});
-		formatDesc.createEl('br');
-		formatDesc.appendText(t('settings.format.current'));
-		const sampleEl = formatDesc.createEl('b', { cls: 'u-pop' });
-
-		new Setting(containerEl)
-			.setName(t('settings.format.name'))
-			.setDesc(formatDesc)
-			.addMomentFormat((component) => {
-				component
-					.setDefaultFormat(period.defaultFormat)
-					.setPlaceholder(period.defaultFormat)
-					.setSampleEl(sampleEl)
-					.setValue(settings.format)
-					.onChange(async (value) => {
-						settings.format = value.trim();
-						await save();
-					});
-				component.updateSample();
+	private formatDefinition(period: PeriodDefinition, visible: () => boolean): SettingDefinition {
+		let sampleEl: HTMLElement | undefined;
+		const desc = createFragment((fragment) => {
+			fragment.appendText(t('settings.format.desc'));
+			fragment.createEl('a', {
+				text: t('settings.format.reference'),
+				href: 'https://momentjs.com/docs/#/displaying/format/',
 			});
+			fragment.createEl('br');
+			fragment.appendText(t('settings.format.current'));
+			sampleEl = fragment.createEl('b', { cls: 'u-pop' });
+		});
 
-		new Setting(containerEl)
-			.setName(t('settings.folder.name'))
-			.setDesc(t('settings.folder.desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(t('settings.folder.placeholder', { label }))
-					.setValue(settings.folder)
-					.onChange(async (value) => {
-						settings.folder = value.trim();
-						await save();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName(t('settings.template.name'))
-			.setDesc(t('settings.template.desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(t('settings.template.placeholder', { label }))
-					.setValue(settings.template)
-					.onChange(async (value) => {
-						settings.template = value.trim();
-						await save();
-					}),
-			);
+		return {
+			name: t('settings.format.name'),
+			desc,
+			visible,
+			render: (setting) => {
+				setting.addMomentFormat((component) => {
+					component.setDefaultFormat(period.defaultFormat).setPlaceholder(period.defaultFormat);
+					if (sampleEl) {
+						component.setSampleEl(sampleEl);
+					}
+					component.setValue(this.plugin.settings.periods[period.id].format).onChange(async (value) => {
+						this.plugin.settings.periods[period.id].format = value.trim();
+						await this.plugin.saveSettings();
+					});
+					component.updateSample();
+				});
+			},
+		};
 	}
 }
