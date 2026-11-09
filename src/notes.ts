@@ -39,7 +39,7 @@ export class PeriodicNoteOpener {
 		period: PeriodDefinition,
 		settings: PeriodSettings,
 		openInNewTab: boolean,
-		date: Moment = moment(),
+		date: Moment = moment() as Moment,
 	): Promise<void> {
 		const path = periodicNotePath(period, settings, date);
 		const file = await this.getOrCreate(path, period, settings, date);
