@@ -1,0 +1,25 @@
+{
+  "name": "more-periodic-notes",
+  "version": "0.1.0",
+  "description": "Open ISO weekly, monthly and yearly notes in Obsidian, on desktop and mobile.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "periodic-notes",
+    "weekly-notes"
+  ],
+  "author": "Ruzen",
+  "license": "MIT",
+  "devDependencies": {
+    "builtin-modules": "^5.0.0",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "typescript": "^5.9.0"
+  }
+}

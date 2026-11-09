@@ -1,0 +1,10 @@
+{
+  "id": "more-periodic-notes",
+  "name": "More Periodic Notes",
+  "version": "0.1.0",
+  "minAppVersion": "1.8.7",
+  "description": "Open this week's (ISO), this month's and this year's note with one command. Works on desktop and mobile.",
+  "author": "Ruzen",
+  "authorUrl": "https://github.com/nachiketa3299",
+  "isDesktopOnly": false
+}
