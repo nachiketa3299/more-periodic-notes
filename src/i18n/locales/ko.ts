@@ -16,7 +16,8 @@ const ko: Locale = {
 	'settings.heading.monthly': '월간 노트',
 	'settings.heading.yearly': '연간 노트',
 	'settings.enable.name': '사용',
-	'settings.enable.desc': '"{command}" 명령을 추가합니다.',
+	'settings.enable.desc':
+		'"{command}" 명령과 리본 동작을 사용합니다. 리본 표시 여부는 Obsidian 설정에서 관리합니다.',
 	'settings.format.name': '이름 형식',
 	'settings.format.desc': 'Moment.js 형식으로 노트 이름을 정합니다. 슬래시(/)를 넣으면 하위 폴더가 만들어집니다. ',
 	'settings.format.reference': '형식 문법 보기',
@@ -29,6 +30,7 @@ const ko: Locale = {
 		'노트를 새로 만들 때 적용합니다. {{title}}, {{date}}, {{time}}, {{start}}, {{end}}를 쓸 수 있고, 각각 뒤에 :형식을 붙일 수 있습니다.',
 	'settings.template.placeholder': '예: 템플릿/{label}',
 
+	'notice.periodDisabled': '{period} 사용이 꺼져 있습니다. 플러그인 설정에서 켜 주세요.',
 	'notice.pathIsFolder': '노트를 만들 수 없습니다. "{path}"은(는) 폴더입니다.',
 	'notice.pathIsFile': '"{path}"은(는) 폴더가 아니라 파일입니다.',
 	'notice.templateNotFound': '템플릿을 찾을 수 없습니다: {path}',
