@@ -14,7 +14,8 @@ const en = {
 	'settings.heading.monthly': 'Monthly notes',
 	'settings.heading.yearly': 'Yearly notes',
 	'settings.enable.name': 'Enable',
-	'settings.enable.desc': 'Adds the "{command}" command.',
+	'settings.enable.desc':
+		'Enables the "{command}" command and ribbon action. Manage ribbon visibility in Obsidian settings.',
 	'settings.format.name': 'Name format',
 	'settings.format.desc': 'Moment.js format for the note name. Slashes create subfolders. ',
 	'settings.format.reference': 'Syntax reference',
@@ -27,6 +28,7 @@ const en = {
 		'Used when a note is created. Supports {{title}}, {{date}}, {{time}}, {{start}} and {{end}}, each with an optional :FORMAT.',
 	'settings.template.placeholder': 'Example: Templates/{label}',
 
+	'notice.periodDisabled': 'Opening the {period} is disabled. Enable it in the plugin settings.',
 	'notice.pathIsFolder': 'Cannot create note: "{path}" is a folder.',
 	'notice.pathIsFile': '"{path}" is a file, not a folder.',
 	'notice.templateNotFound': 'Template not found: {path}',

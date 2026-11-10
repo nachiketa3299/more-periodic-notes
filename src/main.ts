@@ -1,5 +1,6 @@
 import { Notice, Plugin } from 'obsidian';
 import { t } from './i18n';
+import { registerPeriodIcons } from './icons';
 import { PeriodicNoteOpener } from './notes';
 import { PERIODS, type PeriodDefinition } from './periods';
 import {
@@ -15,11 +16,12 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		this.register(registerPeriodIcons());
 		this.opener = new PeriodicNoteOpener(this.app);
 		this.addSettingTab(new MorePeriodicNotesSettingTab(this.app, this));
 
 		for (const period of PERIODS) {
-			this.addOpenCommand(period);
+			this.registerPeriodActions(period);
 		}
 	}
 
@@ -32,6 +34,11 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 	}
 
 	async openPeriodicNote(period: PeriodDefinition): Promise<void> {
+		if (!this.isPeriodEnabled(period)) {
+			new Notice(t('notice.periodDisabled', { period: t(`period.${period.id}`) }));
+			return;
+		}
+
 		try {
 			await this.opener.open(period, this.settings.periods[period.id], this.settings.openInNewTab);
 		} catch (error) {
@@ -41,13 +48,19 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 		}
 	}
 
-	private addOpenCommand(period: PeriodDefinition): void {
+	private isPeriodEnabled(period: PeriodDefinition): boolean {
+		return this.settings.periods[period.id].enabled;
+	}
+
+	private registerPeriodActions(period: PeriodDefinition): void {
+		const name = t('command.open', { period: t(`period.${period.id}`) });
+
 		this.addCommand({
 			id: `open-${period.id}-note`,
-			name: t('command.open', { period: t(`period.${period.id}`) }),
+			name,
 			icon: period.icon,
 			checkCallback: (checking) => {
-				if (!this.settings.periods[period.id].enabled) {
+				if (!this.isPeriodEnabled(period)) {
 					return false;
 				}
 				if (!checking) {
@@ -55,6 +68,10 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 				}
 				return true;
 			},
+		});
+
+		this.addRibbonIcon(period.icon, name, () => {
+			void this.openPeriodicNote(period);
 		});
 	}
 }
