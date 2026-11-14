@@ -16,7 +16,7 @@ Obsidian's Daily notes plugin covers only daily notes.
 
 ## Find periodic notes by date
 
-Run **Find periodic notes by date** from the command palette. Today's date is selected so you can replace it with a date in `YYYY-MM-DD` format.
+Run **Find periodic notes by date** from the command palette or the calendar-with-magnifying-glass ribbon icon. Today's date is selected so you can replace it with a date in `YYYY-MM-DD` format.
 
 When the date is valid, choose an action from the list:
 
@@ -33,14 +33,14 @@ Use the arrow keys and **Enter**, or tap an action on mobile. Press **Esc** to c
 
 ## Ribbon and mobile Quick Access
 
-The plugin adds a ribbon action for each period. The calendar icons show **W** for weekly, **M** for monthly and **Y** for yearly notes. Each action uses the same folder, name format, template and tab settings as its command.
+The plugin adds a ribbon action for each period and for **Find periodic notes by date**. The calendar icons show **W** for weekly, **M** for monthly, **Y** for yearly notes and a magnifying glass for date lookup. Each ribbon action runs the same action as its command.
 
 On mobile, assign one of these actions to the Quick Access ribbon button:
 
 1. Open **Settings → Appearance → Ribbon menu → Manage**.
-2. Set **Quick access** to **Open weekly note**, **Open monthly note** or **Open yearly note**.
+2. Set **Quick access** to **Open weekly note**, **Open monthly note**, **Open yearly note** or **Find periodic notes by date**.
 
-A short press opens the selected period's note. A long press opens the full ribbon menu.
+A short press runs the selected action. A long press opens the full ribbon menu.
 
 Use Obsidian's ribbon controls to hide or reorder ribbon items.
 

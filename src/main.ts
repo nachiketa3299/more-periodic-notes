@@ -2,7 +2,7 @@ import type { Moment } from 'moment';
 import { Notice, Plugin, moment } from 'obsidian';
 import { DatePickerModal } from './date-picker';
 import { t } from './i18n';
-import { registerPeriodIcons } from './icons';
+import { DATE_LOOKUP_ICON, registerIcons } from './icons';
 import { PeriodicNoteOpener } from './notes';
 import { PERIODS, type PeriodDefinition } from './periods';
 import {
@@ -18,18 +18,22 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
-		this.register(registerPeriodIcons());
+		this.register(registerIcons());
 		this.opener = new PeriodicNoteOpener(this.app);
 		this.addSettingTab(new MorePeriodicNotesSettingTab(this.app, this));
 
 		for (const period of PERIODS) {
 			this.registerPeriodActions(period);
 		}
+		const findByDateName = t('command.findByDate');
+		const openDatePicker = () => new DatePickerModal(this).open();
 		this.addCommand({
 			id: 'find-periodic-note-by-date',
-			name: t('command.findByDate'),
-			callback: () => new DatePickerModal(this).open(),
+			name: findByDateName,
+			icon: DATE_LOOKUP_ICON.id,
+			callback: openDatePicker,
 		});
+		this.addRibbonIcon(DATE_LOOKUP_ICON.id, findByDateName, openDatePicker);
 	}
 
 	async loadSettings(): Promise<void> {

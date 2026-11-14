@@ -45,20 +45,26 @@ import { addIcon, removeIcon } from 'obsidian';
 export const PERIOD_ICONS = {
 	weekly: {
 		id: 'more-periodic-notes-weekly',
-		letterPath: 'M7 13 9 19 12 14.5 15 19 17 13',
+		symbol: '<path d="M7 13 9 19 12 14.5 15 19 17 13"/>',
 	},
 	monthly: {
 		id: 'more-periodic-notes-monthly',
-		letterPath: 'M8 19V13L12 17 16 13V19',
+		symbol: '<path d="M8 19V13L12 17 16 13V19"/>',
 	},
 	yearly: {
 		id: 'more-periodic-notes-yearly',
-		letterPath: 'M8.5 13 12 16.5 15.5 13M12 16.5V19',
+		symbol: '<path d="M8.5 13 12 16.5 15.5 13M12 16.5V19"/>',
 	},
 } as const;
 
-export function registerPeriodIcons(): () => void {
-	for (const { id, letterPath } of Object.values(PERIOD_ICONS)) {
+export const DATE_LOOKUP_ICON = {
+	id: 'more-periodic-notes-date-lookup',
+	symbol: '<circle cx="10.5" cy="15" r="2.8"/><path d="m12.5 17 2.5 2.5"/>',
+} as const;
+
+export function registerIcons(): () => void {
+	const icons = [...Object.values(PERIOD_ICONS), DATE_LOOKUP_ICON];
+	for (const { id, symbol } of icons) {
 		addIcon(
 			id,
 			`<g transform="scale(${100 / 24})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -66,13 +72,13 @@ export function registerPeriodIcons(): () => void {
 				<path d="M16 2v4"/>
 				<rect x="3" y="4" width="18" height="18" rx="2"/>
 				<path d="M3 10h18"/>
-				<path d="${letterPath}" stroke-width="1.8"/>
+				<g stroke-width="1.8">${symbol}</g>
 			</g>`,
 		);
 	}
 
 	return () => {
-		for (const { id } of Object.values(PERIOD_ICONS)) {
+		for (const { id } of icons) {
 			removeIcon(id);
 		}
 	};
