@@ -1,19 +1,28 @@
 import type { Moment } from 'moment';
-import { App, Notice, TFile, TFolder, moment, normalizePath } from 'obsidian';
+import { App, Notice, TFile, TFolder, normalizePath } from 'obsidian';
 import { t } from './i18n';
 import type { PeriodDefinition } from './periods';
 import type { PeriodSettings } from './settings';
 
 const MARKDOWN_EXTENSION = '.md';
 
-export function resolveFormat(period: PeriodDefinition, settings: PeriodSettings): string {
-	return settings.format.trim() || period.defaultFormat;
+export interface PeriodicNoteTarget {
+	name: string;
+	path: string;
 }
 
-export function periodicNotePath(period: PeriodDefinition, settings: PeriodSettings, date: Moment): string {
-	const name = date.format(resolveFormat(period, settings));
+export function resolvePeriodicNote(
+	period: PeriodDefinition,
+	settings: PeriodSettings,
+	date: Moment,
+): PeriodicNoteTarget {
+	const name = date.format(settings.format.trim() || period.defaultFormat);
+	if (!name.trim() || /[\\/]/.test(name)) {
+		throw new Error(t('notice.invalidName', { period: t(`period.${period.id}`) }));
+	}
 	const folder = settings.folder.trim().replace(/^\/+|\/+$/g, '');
-	return normalizePath(folder ? `${folder}/${name}${MARKDOWN_EXTENSION}` : `${name}${MARKDOWN_EXTENSION}`);
+	const path = normalizePath(folder ? `${folder}/${name}${MARKDOWN_EXTENSION}` : `${name}${MARKDOWN_EXTENSION}`);
+	return { name, path };
 }
 
 export function renderTemplate(raw: string, period: PeriodDefinition, date: Moment, title: string): string {
@@ -38,11 +47,11 @@ export class PeriodicNoteOpener {
 	async open(
 		period: PeriodDefinition,
 		settings: PeriodSettings,
+		date: Moment,
 		openInNewTab: boolean,
-		date: Moment = moment() as Moment,
 	): Promise<void> {
-		const path = periodicNotePath(period, settings, date);
-		const file = await this.getOrCreate(path, period, settings, date);
+		const target = resolvePeriodicNote(period, settings, date);
+		const file = await this.getOrCreate(target, period, settings, date);
 		if (!file) {
 			return;
 		}
@@ -51,11 +60,12 @@ export class PeriodicNoteOpener {
 	}
 
 	private async getOrCreate(
-		path: string,
+		target: PeriodicNoteTarget,
 		period: PeriodDefinition,
 		settings: PeriodSettings,
 		date: Moment,
 	): Promise<TFile | null> {
+		const { name, path } = target;
 		const existing = this.app.vault.getAbstractFileByPath(path);
 		if (existing instanceof TFile) {
 			return existing;
@@ -66,9 +76,8 @@ export class PeriodicNoteOpener {
 		}
 
 		await this.ensureParentFolder(path);
-		const title = path.slice(path.lastIndexOf('/') + 1, -MARKDOWN_EXTENSION.length);
 		const template = await this.readTemplate(settings.template);
-		const content = renderTemplate(template, period, date, title);
+		const content = renderTemplate(template, period, date, name);
 		return this.app.vault.create(path, content);
 	}
 

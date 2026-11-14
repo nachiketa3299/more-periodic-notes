@@ -1,4 +1,6 @@
-import { Notice, Plugin } from 'obsidian';
+import type { Moment } from 'moment';
+import { Notice, Plugin, moment } from 'obsidian';
+import { DatePickerModal } from './date-picker';
 import { t } from './i18n';
 import { registerPeriodIcons } from './icons';
 import { PeriodicNoteOpener } from './notes';
@@ -23,6 +25,11 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 		for (const period of PERIODS) {
 			this.registerPeriodActions(period);
 		}
+		this.addCommand({
+			id: 'find-periodic-note-by-date',
+			name: t('command.findByDate'),
+			callback: () => new DatePickerModal(this).open(),
+		});
 	}
 
 	async loadSettings(): Promise<void> {
@@ -33,14 +40,14 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async openPeriodicNote(period: PeriodDefinition): Promise<void> {
+	async openPeriodicNote(period: PeriodDefinition, date: Moment): Promise<void> {
 		if (!this.isPeriodEnabled(period)) {
 			new Notice(t('notice.periodDisabled', { period: t(`period.${period.id}`) }));
 			return;
 		}
 
 		try {
-			await this.opener.open(period, this.settings.periods[period.id], this.settings.openInNewTab);
+			await this.opener.open(period, this.settings.periods[period.id], date, this.settings.openInNewTab);
 		} catch (error) {
 			console.error('[more-periodic-notes]', error);
 			const message = error instanceof Error ? error.message : String(error);
@@ -64,14 +71,14 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 					return false;
 				}
 				if (!checking) {
-					void this.openPeriodicNote(period);
+					void this.openPeriodicNote(period, moment() as Moment);
 				}
 				return true;
 			},
 		});
 
 		this.addRibbonIcon(period.icon, name, () => {
-			void this.openPeriodicNote(period);
+			void this.openPeriodicNote(period, moment() as Moment);
 		});
 	}
 }
