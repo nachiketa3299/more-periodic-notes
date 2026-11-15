@@ -1,10 +1,11 @@
 import type { Moment } from 'moment';
-import { Notice, SuggestModal, TFile, moment } from 'obsidian';
+import { Notice, SuggestModal, TFile, moment as obsidianMoment } from 'obsidian';
 import { t } from './i18n';
 import type MorePeriodicNotesPlugin from './main';
 import { resolvePeriodicNote } from './notes';
 import { PERIODS, type PeriodDefinition } from './periods';
 
+const moment = obsidianMoment as typeof import('moment');
 const DATE_FORMAT = 'YYYY-MM-DD';
 
 type DateAction =
@@ -24,8 +25,8 @@ export class DatePickerModal extends SuggestModal<DateAction> {
 		]);
 	}
 
-	onOpen(): void {
-		super.onOpen();
+	async onOpen(): Promise<void> {
+		await super.onOpen();
 		this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 		this.inputEl.select();
 	}
@@ -36,7 +37,7 @@ export class DatePickerModal extends SuggestModal<DateAction> {
 		if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) {
 			return [];
 		}
-		const date = moment(input, DATE_FORMAT, true) as Moment;
+		const date = moment(input, DATE_FORMAT, true);
 		if (!date.isValid()) {
 			this.emptyStateText = t('picker.invalidDate');
 			return [];
@@ -80,17 +81,26 @@ export class DatePickerModal extends SuggestModal<DateAction> {
 		content.createDiv({ cls: 'suggestion-note', text: action.name });
 	}
 
-	async onChooseSuggestion(action: DateAction): Promise<void> {
+	onChooseSuggestion(action: DateAction): void {
+		this.executeAction(action).catch((error: unknown) => {
+			console.error('[more-periodic-notes]', error);
+			new Notice(
+				action.type === 'copy'
+					? t('notice.copyFailed')
+					: t('notice.openFailed', {
+							period: t(`period.${action.period.id}`),
+							message: error instanceof Error ? error.message : String(error),
+						}),
+			);
+		});
+	}
+
+	private async executeAction(action: DateAction): Promise<void> {
 		if (action.type === 'open') {
 			await this.plugin.openPeriodicNote(action.period, action.date);
 			return;
 		}
-		try {
-			await this.inputEl.ownerDocument.defaultView!.navigator.clipboard.writeText(action.name);
-			new Notice(t('notice.copied', { name: action.name }));
-		} catch (error) {
-			console.error('[more-periodic-notes]', error);
-			new Notice(t('notice.copyFailed'));
-		}
+		await this.inputEl.ownerDocument.defaultView!.navigator.clipboard.writeText(action.name);
+		new Notice(t('notice.copied', { name: action.name }));
 	}
 }
