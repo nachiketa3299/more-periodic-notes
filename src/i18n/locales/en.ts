@@ -26,11 +26,12 @@ const en = {
 	'settings.enable.desc':
 		'Enables opening or creating this note from "{command}", the ribbon, and the date lookup. Manage ribbon visibility in Obsidian settings.',
 	'settings.format.name': 'Name format',
-	'settings.format.desc': 'Moment.js format for the file name. The folder setting determines its location. ',
+	'settings.format.desc': 'Moment.js format for the file name. ',
 	'settings.format.reference': 'Syntax reference',
 	'settings.format.current': 'Current note: ',
-	'settings.folder.name': 'Folder',
-	'settings.folder.desc': 'New notes are created here. Leave empty for the vault root.',
+	'settings.folder.name': 'New note folder',
+	'settings.folder.desc':
+		'Existing notes are found anywhere in the vault. If none exists, a note is created here. Leave empty for the vault root.',
 	'settings.folder.placeholder': 'Example: Journal/{label}',
 	'settings.template.name': 'Template file',
 	'settings.template.desc':

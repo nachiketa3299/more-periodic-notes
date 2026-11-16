@@ -1,8 +1,8 @@
 import type { Moment } from 'moment';
-import { Notice, SuggestModal, TFile, moment as obsidianMoment } from 'obsidian';
+import { Notice, SuggestModal, moment as obsidianMoment } from 'obsidian';
 import { t } from './i18n';
 import type MorePeriodicNotesPlugin from './main';
-import { resolvePeriodicNote } from './notes';
+import { findPeriodicNote, resolvePeriodicNote } from './notes';
 import { PERIODS, type PeriodDefinition } from './periods';
 
 const moment = obsidianMoment as typeof import('moment');
@@ -60,7 +60,7 @@ export class DatePickerModal extends SuggestModal<DateAction> {
 						name: target.name,
 						period,
 						date,
-						exists: this.app.vault.getAbstractFileByPath(target.path) instanceof TFile,
+						exists: findPeriodicNote(this.app, target.name) !== null,
 					});
 				}
 			}

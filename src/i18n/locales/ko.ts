@@ -28,11 +28,12 @@ const ko: Locale = {
 	'settings.enable.desc':
 		'"{command}" 명령, 리본 동작, 날짜 조회에서 이 노트를 열거나 만듭니다. 리본 표시 여부는 Obsidian 설정에서 관리합니다.',
 	'settings.format.name': '이름 형식',
-	'settings.format.desc': 'Moment.js 형식으로 파일명을 정합니다. 저장 위치는 폴더 설정을 사용합니다. ',
+	'settings.format.desc': 'Moment.js 형식으로 파일명을 정합니다. ',
 	'settings.format.reference': '형식 문법 보기',
 	'settings.format.current': '현재 노트: ',
-	'settings.folder.name': '폴더',
-	'settings.folder.desc': '새 노트를 이 폴더에 만듭니다. 비워 두면 보관소 루트에 만듭니다.',
+	'settings.folder.name': '새 노트 폴더',
+	'settings.folder.desc':
+		'기존 노트는 볼트 전체에서 찾습니다. 없으면 이 폴더에 만듭니다. 비워 두면 보관소 루트에 만듭니다.',
 	'settings.folder.placeholder': '예: 일지/{label}',
 	'settings.template.name': '템플릿 파일',
 	'settings.template.desc':

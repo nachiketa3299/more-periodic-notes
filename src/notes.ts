@@ -25,6 +25,16 @@ export function resolvePeriodicNote(
 	return { name, path };
 }
 
+export function findPeriodicNote(app: App, name: string): TFile | null {
+	let selected: TFile | null = null;
+	for (const file of app.vault.getMarkdownFiles()) {
+		if (file.basename === name && (!selected || file.path < selected.path)) {
+			selected = file;
+		}
+	}
+	return selected;
+}
+
 export function renderTemplate(raw: string, period: PeriodDefinition, date: Moment, title: string): string {
 	const start = date.clone().startOf(period.unit);
 	const end = date.clone().endOf(period.unit);
@@ -66,11 +76,11 @@ export class PeriodicNoteOpener {
 		date: Moment,
 	): Promise<TFile | null> {
 		const { name, path } = target;
-		const existing = this.app.vault.getAbstractFileByPath(path);
-		if (existing instanceof TFile) {
+		const existing = findPeriodicNote(this.app, name);
+		if (existing) {
 			return existing;
 		}
-		if (existing) {
+		if (this.app.vault.getAbstractFileByPath(path)) {
 			new Notice(t('notice.pathIsFolder', { path }));
 			return null;
 		}
