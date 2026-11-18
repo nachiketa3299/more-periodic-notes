@@ -9,6 +9,8 @@ const ko: Locale = {
 	'period.label.yearly': '연간',
 
 	'command.open': '{period} 열기',
+	'command.previous': '이전 {period} 열기',
+	'command.next': '다음 {period} 열기',
 	'command.findByDate': '날짜로 주기 노트 찾기',
 
 	'picker.placeholder': '날짜를 YYYY-MM-DD 형식으로 입력하세요',

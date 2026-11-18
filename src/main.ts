@@ -2,7 +2,7 @@ import type { Moment } from 'moment';
 import { Notice, Plugin, moment } from 'obsidian';
 import { DatePickerModal } from './date-picker';
 import { t } from './i18n';
-import { DATE_LOOKUP_ICON, registerIcons } from './icons';
+import { DATE_LOOKUP_ICON, NAVIGATION_ICONS, registerIcons } from './icons';
 import { PeriodicNoteOpener } from './notes';
 import { PERIODS, type PeriodDefinition } from './periods';
 import {
@@ -84,5 +84,32 @@ export default class MorePeriodicNotesPlugin extends Plugin {
 		this.addRibbonIcon(period.icon, name, () => {
 			void this.openPeriodicNote(period, moment() as Moment);
 		});
+
+		for (const direction of ['previous', 'next'] as const) {
+			const navigationName = t(`command.${direction}`, { period: t(`period.${period.id}`) });
+			const icon = NAVIGATION_ICONS[period.id][direction].id;
+			const navigate = () => this.openAdjacentNote(period, direction === 'previous' ? -1 : 1);
+			this.addCommand({
+				id: `open-${direction}-${period.id}-note`,
+				name: navigationName,
+				icon,
+				checkCallback: (checking) => {
+					if (!this.isPeriodEnabled(period)) return false;
+					if (!checking) void navigate();
+					return true;
+				},
+			});
+			this.addRibbonIcon(icon, navigationName, () => { void navigate(); });
+		}
+	}
+
+	private async openAdjacentNote(period: PeriodDefinition, offset: number): Promise<void> {
+		const format = this.settings.periods[period.id].format.trim() || period.defaultFormat;
+		const name = this.app.workspace.getActiveFile()?.basename;
+		let date = moment(name, format, true) as Moment;
+		if (!name || !date.isValid() || date.format(format) !== name) {
+			date = moment() as Moment;
+		}
+		await this.openPeriodicNote(period, date.startOf(period.unit).add(offset, period.unit === 'isoWeek' ? 'week' : period.unit));
 	}
 }

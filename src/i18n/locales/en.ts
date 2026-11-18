@@ -7,6 +7,8 @@ const en = {
 	'period.label.yearly': 'Yearly',
 
 	'command.open': 'Open {period}',
+	'command.previous': 'Open previous {period}',
+	'command.next': 'Open next {period}',
 	'command.findByDate': 'Find periodic notes by date',
 
 	'picker.placeholder': 'Enter a date in YYYY-MM-DD format',

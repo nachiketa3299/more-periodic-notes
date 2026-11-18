@@ -62,8 +62,22 @@ export const DATE_LOOKUP_ICON = {
 	symbol: '<circle cx="10.5" cy="15" r="2.8"/><path d="m12.5 17 2.5 2.5"/>',
 } as const;
 
+function navigationIcons(icon: { id: string; symbol: string }) {
+	return {
+		previous: { id: `${icon.id}-previous`, symbol: `${icon.symbol}<path d="m12 5-2 2 2 2M10 7h4"/>` },
+		next: { id: `${icon.id}-next`, symbol: `${icon.symbol}<path d="m12 5 2 2-2 2M10 7h4"/>` },
+	};
+}
+
+export const NAVIGATION_ICONS = {
+	weekly: navigationIcons(PERIOD_ICONS.weekly),
+	monthly: navigationIcons(PERIOD_ICONS.monthly),
+	yearly: navigationIcons(PERIOD_ICONS.yearly),
+};
+
 export function registerIcons(): () => void {
-	const icons = [...Object.values(PERIOD_ICONS), DATE_LOOKUP_ICON];
+	const icons: { id: string; symbol: string }[] = [...Object.values(PERIOD_ICONS), DATE_LOOKUP_ICON];
+	for (const navigation of Object.values(NAVIGATION_ICONS)) icons.push(...Object.values(navigation));
 	for (const { id, symbol } of icons) {
 		addIcon(
 			id,

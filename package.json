@@ -1,6 +1,6 @@
 {
   "name": "more-periodic-notes",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Open ISO weekly, monthly and yearly notes in Obsidian, on desktop and mobile.",
   "main": "main.js",
   "scripts": {
